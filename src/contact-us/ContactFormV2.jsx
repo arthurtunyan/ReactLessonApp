@@ -55,7 +55,7 @@ const initialState = {
     }
 };
 
-function ContactForm() {
+function ContactFormV2() {
     const [state, setState] = useState(initialState);
 
     const [focused, setFocused] = useState({}); //tracks which field is focused for example todo i dont need focus state at all
@@ -324,8 +324,4 @@ function ContactForm() {
     );
 }
 
-createRoot(document.getElementById("root")).render(
-    <>
-        <ContactForm/>
-    </>
-);
+export default ContactFormV2;

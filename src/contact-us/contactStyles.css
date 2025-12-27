@@ -1,0 +1,130 @@
+.invalid{
+    border: 2px solid red;
+    outline:none;
+    animation: pulse 0.5s;
+
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    }
+}
+
+
+:root {
+    --primary-color: #0b1a33;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f9;
+    margin: 0;
+    padding: 20px;
+}
+
+.contact-container {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+}
+
+.contact-title {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #000;
+}
+
+.formRow {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+.inquiry,
+.name-field,
+.email-field,
+.messageBox,
+.attachments-field {
+    flex: 1;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.required::after {
+    content: " *";
+    color: red;
+}
+
+select, input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #f9fafb;
+}
+
+textarea {
+    height: 100px;
+}
+
+.attachmentBox {
+    border-radius: 8px;
+    text-align: center;
+    padding: 20px;
+    background-color: #fafafa;
+    border-style: dashed;
+    border-width: 1px;
+    border-color: #ccc;
+}
+
+.attachmentBox input {
+    display: none;
+}
+
+.submitButton {
+    display: inline-block;
+    padding: 12px 20px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+}
+
+.submitButton:hover {
+    background-color: #162c4d;
+    transform: scale(1.1);
+}
+
+#bgAttachments {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+@media (min-width: 576px) and (max-width: 600px) {
+    .formRow:nth-child(2) {
+        flex-direction: column;
+    }
+}
+
