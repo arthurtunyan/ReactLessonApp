@@ -1,8 +1,9 @@
-import React, {useMemo, useState} from "react";
+import React, {useMemo, useState, useRef, useEffect} from "react";
 import {validateValue} from "./validationFunctions";
-import Modal from "./ModalModule";
-import Button from "./Button";
-import Input from "./Input";
+import Modal from "../components/ModalModule";
+import Button from "../components/Button";
+import Input from "../components/Input";
+
 
 function GlobalStyles() {
     return (
@@ -203,6 +204,10 @@ const initialState = {
 function ContactFormV2() {
     const [state, setState] = useState(initialState);
     const [showConfirm, setShowConfirm] = useState(false);
+    const selectRef = useRef(null);
+    useEffect(() => {
+        selectRef.current?.focus();
+    }, [])
 
     const formIsValid = useMemo(() => {
         return ["inquiry", "name", "email", "message"].every((key) => state[key].isValid);
@@ -322,6 +327,7 @@ function ContactFormV2() {
                                 value={state.inquiry.value}
                                 onChange={handleChange}
                                 onFocus={handleFocus}
+                                ref={selectRef}
                                 style={{
                                     ...selectBaseStyle,
                                     ...(shouldShowError("inquiry") ? selectInvalidStyle : {}),
