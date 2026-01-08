@@ -1,155 +1,141 @@
-import React, {useMemo, useState, useRef, useEffect} from "react";
-import {validateValue} from "./validationFunctions";
+import React, { useMemo, useState, useRef, useEffect } from "react";
+import styled from "styled-components";
+import { validateValue } from "./validationFunctions";
 import Modal from "../components/ModalModule";
 import Button from "../components/Button";
 import Input from "../components/Input";
 
+const PageWrapper = styled.div`
+  min-height: 100vh;
+  background-color: #f7f7f9;
+  padding: 20px;
+  font-family: Arial;
+`;
 
-function GlobalStyles() {
-    return (
-        <style>
-            {`
-        body {
-          font-family: Arial, sans-serif;
-          background-color: #f7f7f9;
-          margin: 0;
-          padding: 20px;
-        }
-      `}
-        </style>
-    );
-}
+const Container = styled.main`
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+`;
 
-const containerStyle = {
-    maxWidth: "800px",
-    margin: "0 auto",
-    padding: "24px",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#fff",
-    borderRadius: "15px",
-    boxShadow: "0 5px 20px rgba(0, 0, 0, 0.1)",
-};
+const HeaderBox = styled.header`
+  margin-bottom: 32px;
+  text-align: center;
+`;
 
-const headerStyle = {
-    marginBottom: "32px",
-    textAlign: "center",
-};
+const Title = styled.h1`
+  font-size: 32px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+`;
 
-const titleStyle = {
-    fontSize: "32px",
-    fontWeight: "700",
-    color: "#000",
-    margin: 0,
-};
+const Form = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+`;
 
-const formStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-};
+const FormRow = styled.div`
+  display: flex;
+  gap: 16px;
+  width: 100%;
+`;
 
-const formRowStyle = {
-    display: "flex",
-    gap: "16px",
-    width: "100%",
-};
+const FormColumn = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
 
-const formRowSingleStyle = {
-    display: "flex",
-    flexDirection: "column",
-};
+const SelectContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+  width: 100%;
+`;
 
-const selectContainerStyle = {
-    display: "flex",
-    flexDirection: "column",
-    marginBottom: "16px",
-    width: "100%",
-};
+const Label = styled.label`
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+`;
 
-const labelStyle = {
-    marginBottom: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#333",
-};
+const RequiredSpan = styled.span`
+  color: red;
+  margin-left: 4px;
+`;
 
-const requiredSpanStyle = {
-    color: "red",
-    marginLeft: "4px",
-};
+const StyledSelect = styled.select`
+  padding: 10px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  outline: none;
+  background-color: ${(props) => (props.$invalid ? "#fff5f5" : "#f9fafb")};
+  border: 1px solid ${(props) => (props.$invalid ? "#dc3545" : "#ccc")};
+`;
 
-const selectBaseStyle = {
-    padding: "10px 12px",
-    fontSize: "14px",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    outline: "none",
-    backgroundColor: "#f9fafb",
-};
+const ErrorText = styled.p`
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 4px;
+`;
 
-const selectInvalidStyle = {
-    borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
-};
+const AttachmentBox = styled.div`
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  background-color: #fafafa;
+  margin-top: 8px;
+`;
 
-const errorTextStyle = {
-    color: "#dc3545",
-    fontSize: "12px",
-    marginTop: "4px",
-};
+const AttachmentText = styled.p`
+  margin: 8px 0;
+  color: #666;
+`;
 
-const attachmentBoxStyle = {
-    border: "1px dashed #ccc",
-    borderRadius: "8px",
-    padding: "20px",
-    textAlign: "center",
-    backgroundColor: "#fafafa",
-    marginTop: "8px",
-};
+const AttachmentSubtext = styled.p`
+  font-size: 12px;
+  color: #999;
+  margin: 4px 0 16px 0;
+`;
 
-const attachmentTextStyle = {
-    margin: "8px 0",
-    color: "#666",
-};
+const HiddenFileInput = styled.input`
+  display: none;
+`;
 
-const attachmentSubtextStyle = {
-    fontSize: "12px",
-    color: "#999",
-    margin: "4px 0 16px 0",
-};
+const SubmitRow = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+`;
 
-const fileInputStyle = {
-    display: "none",
-};
+const ModalContent = styled.div`
+  text-align: center;
+`;
 
-const modalContentStyle = {
-    textAlign: "center",
-};
+const ModalTitle = styled.h2`
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: #333;
+`;
 
-const modalTitleStyle = {
-    fontSize: "20px",
-    fontWeight: "600",
-    margin: "0 0 16px 0",
-    color: "#333",
-};
+const ModalText = styled.p`
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.5;
+`;
 
-const modalTextStyle = {
-    color: "#666",
-    marginBottom: "24px",
-    lineHeight: 1.5,
-};
-
-const modalActionsStyle = {
-    display: "flex",
-    gap: "12px",
-    justifyContent: "center",
-};
-
-const submitRowStyle = {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: "16px",
-};
+const ModalActions = styled.div`
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+`;
 
 const initialState = {
     inquiry: {
@@ -205,12 +191,15 @@ function ContactFormV2() {
     const [state, setState] = useState(initialState);
     const [showConfirm, setShowConfirm] = useState(false);
     const selectRef = useRef(null);
+
     useEffect(() => {
         selectRef.current?.focus();
-    }, [])
+    }, []);
 
     const formIsValid = useMemo(() => {
-        return ["inquiry", "name", "email", "message"].every((key) => state[key].isValid);
+        return ["inquiry", "name", "email", "message"].every(
+            (key) => state[key].isValid
+        );
     }, [state]);
 
     const handleFocus = (e) => {
@@ -261,7 +250,8 @@ function ContactFormV2() {
 
     const handleChange = (e) => {
         const name = e.target.name;
-        const value = name === "attachment" ? e.target.files?.[0] ?? null : e.target.value;
+        const value =
+            name === "attachment" ? e.target.files?.[0] ?? null : e.target.value;
 
         setState((prevState) => {
             const field = prevState[name];
@@ -290,7 +280,7 @@ function ContactFormV2() {
         const form = document.querySelector("form");
         const attachment = form?.attachment.files[0] || null;
         console.log("Form submitted values:");
-        console.log(state, {attachment});
+        console.log(state, { attachment });
 
         setState(initialState);
         if (form) {
@@ -300,27 +290,25 @@ function ContactFormV2() {
     };
 
     return (
-        <>
-            <GlobalStyles/>
-            <main style={containerStyle}>
-                <header style={headerStyle}>
-                    <h1 style={titleStyle}>Contact Us</h1>
-                </header>
+        <PageWrapper>
+            <Container>
+                <HeaderBox>
+                    <Title>Contact Us</Title>
+                </HeaderBox>
 
-                <form
-                    style={formStyle}
+                <Form
                     action="AboutMe.html"
                     method="get"
                     encType="multipart/form-data"
                     onSubmit={handleSubmit}
                 >
-                    <div style={formRowStyle}>
-                        <div style={selectContainerStyle}>
-                            <label htmlFor="inquiry" style={labelStyle}>
+                    <FormRow>
+                        <SelectContainer>
+                            <Label htmlFor="inquiry">
                                 Inquiry Type
-                                <span style={requiredSpanStyle}>*</span>
-                            </label>
-                            <select
+                                <RequiredSpan>*</RequiredSpan>
+                            </Label>
+                            <StyledSelect
                                 id="inquiry"
                                 name="inquiry"
                                 required
@@ -328,20 +316,17 @@ function ContactFormV2() {
                                 onChange={handleChange}
                                 onFocus={handleFocus}
                                 ref={selectRef}
-                                style={{
-                                    ...selectBaseStyle,
-                                    ...(shouldShowError("inquiry") ? selectInvalidStyle : {}),
-                                }}
+                                $invalid={shouldShowError("inquiry")}
                             >
                                 <option value="">Please select</option>
                                 <option value="general">General Info</option>
                                 <option value="support">Support</option>
                                 <option value="feedback">Feedback</option>
-                            </select>
+                            </StyledSelect>
                             {shouldShowError("inquiry") && (
-                                <p style={errorTextStyle}>{getErrorMessage("inquiry")}</p>
+                                <ErrorText>{getErrorMessage("inquiry")}</ErrorText>
                             )}
-                        </div>
+                        </SelectContainer>
 
                         <Input
                             label="Name"
@@ -352,11 +337,13 @@ function ContactFormV2() {
                             onChange={handleChange}
                             onFocus={handleFocus}
                             isInvalid={shouldShowError("name")}
-                            errorMessage={shouldShowError("name") ? getErrorMessage("name") : ""}
+                            errorMessage={
+                                shouldShowError("name") ? getErrorMessage("name") : ""
+                            }
                         />
-                    </div>
+                    </FormRow>
 
-                    <div style={formRowSingleStyle}>
+                    <FormColumn>
                         <Input
                             label="Email"
                             name="email"
@@ -367,11 +354,12 @@ function ContactFormV2() {
                             onChange={handleChange}
                             onFocus={handleFocus}
                             isInvalid={shouldShowError("email")}
-                            errorMessage={shouldShowError("email") ? getErrorMessage("email") : ""}
+                            errorMessage={
+                                shouldShowError("email") ? getErrorMessage("email") : ""
+                            }
                         />
-                    </div>
-
-                    <div style={formRowSingleStyle}>
+                    </FormColumn>
+                    <FormColumn>
                         <Input
                             label="Message"
                             name="message"
@@ -382,60 +370,63 @@ function ContactFormV2() {
                             onChange={handleChange}
                             onFocus={handleFocus}
                             isInvalid={shouldShowError("message")}
-                            errorMessage={shouldShowError("message") ? getErrorMessage("message") : ""}
+                            errorMessage={
+                                shouldShowError("message") ? getErrorMessage("message") : ""
+                            }
                         />
-                    </div>
+                    </FormColumn>
 
-                    <div style={formRowSingleStyle}>
-                        <label style={labelStyle}>Attachments</label>
-                        <div style={attachmentBoxStyle}>
-                            <p style={attachmentTextStyle}>Choose file or drag here</p>
-                            <p style={attachmentSubtextStyle}>
+                    <FormColumn>
+                        <Label>Attachments</Label>
+                        <AttachmentBox>
+                            <AttachmentText>Choose file or drag here</AttachmentText>
+                            <AttachmentSubtext>
                                 Supported: JPG, JPEG, PNG, GIF, PDF
-                            </p>
+                            </AttachmentSubtext>
 
                             <label htmlFor="file-upload">
                                 <Button
                                     type="button"
-                                    onClick={() => document.getElementById("file-upload").click()}
+                                    onClick={() =>
+                                        document.getElementById("file-upload").click()
+                                    }
                                 >
                                     Browse file
                                 </Button>
                             </label>
 
-                            <input
+                            <HiddenFileInput
                                 type="file"
                                 id="file-upload"
                                 name="attachment"
                                 accept=".jpg,.jpeg,.png,.gif,.pdf"
                                 onChange={handleChange}
-                                style={fileInputStyle}
                             />
-                        </div>
-                    </div>
+                        </AttachmentBox>
+                    </FormColumn>
 
-                    <div style={submitRowStyle}>
+                    <SubmitRow>
                         <Button type="submit" disabled={!formIsValid}>
                             Submit
                         </Button>
-                    </div>
+                    </SubmitRow>
 
                     <Modal isOpen={showConfirm} onClose={() => setShowConfirm(false)}>
-                        <div style={modalContentStyle}>
-                            <h2 style={modalTitleStyle}>Confirm Submission</h2>
-                            <p style={modalTextStyle}>
+                        <ModalContent>
+                            <ModalTitle>Confirm Submission</ModalTitle>
+                            <ModalText>
                                 Are you sure that you want to submit this form?
-                            </p>
+                            </ModalText>
 
-                            <div style={modalActionsStyle}>
+                            <ModalActions>
                                 <Button onClick={() => setShowConfirm(false)}>No</Button>
                                 <Button onClick={confirmSubmit}>Yes</Button>
-                            </div>
-                        </div>
+                            </ModalActions>
+                        </ModalContent>
                     </Modal>
-                </form>
-            </main>
-        </>
+                </Form>
+            </Container>
+        </PageWrapper>
     );
 }
 
