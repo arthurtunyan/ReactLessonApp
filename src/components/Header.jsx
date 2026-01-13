@@ -36,6 +36,26 @@ function Header() {
             >
                 Contact Us
             </Link>
+            
+            <Link to={"/about"}
+                  style={linkStyle(active === "about")}
+                  onClick={() => setActive("about")}>
+                About Me
+            </Link>
+
+            <Link to={"/gallery"}
+                  style={linkStyle(active === "gallery")}
+                  onClick={() => setActive("gallery")}>
+                Gallery
+                </Link>
+
+            <Link to={"todo"}
+                  style={linkStyle(active==="todo")}
+                  onClick={()=> setActive("todo")}
+                  >
+                To Do
+            </Link>
+
 
         </nav>
     );
