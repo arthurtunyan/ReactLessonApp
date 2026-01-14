@@ -1,227 +1,67 @@
-import React, {useMemo, useState, useRef, useEffect} from "react";
-import {validateValue} from "./validationFunctions";
+import React, {useMemo, useState, useRef, useEffect, useTransition, useReducer} from "react";
 import Modal from "../components/ModalModule";
 import Button from "../components/Button";
 import Input from "../components/Input";
-
-
-function GlobalStyles() {
-    return (
-        <style>
-            {`
-        body {
-          font-family: Arial, sans-serif;
-          background-color: #f7f7f9;
-          margin: 0;
-          padding: 20px;
-        }
-      `}
-        </style>
-    );
-}
-
-const containerStyle = {
-    maxWidth: "800px",
-    margin: "0 auto",
-    padding: "24px",
-    fontFamily: "Arial, sans-serif",
-    backgroundColor: "#fff",
-    borderRadius: "15px",
-    boxShadow: "0 5px 20px rgba(0, 0, 0, 0.1)",
-};
-
-const headerStyle = {
-    marginBottom: "32px",
-    textAlign: "center",
-};
-
-const titleStyle = {
-    fontSize: "32px",
-    fontWeight: "700",
-    color: "#000",
-    margin: 0,
-};
-
-const formStyle = {
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-};
-
-const formRowStyle = {
-    display: "flex",
-    gap: "16px",
-    width: "100%",
-};
-
-const formRowSingleStyle = {
-    display: "flex",
-    flexDirection: "column",
-};
-
-const selectContainerStyle = {
-    display: "flex",
-    flexDirection: "column",
-    marginBottom: "16px",
-    width: "100%",
-};
-
-const labelStyle = {
-    marginBottom: "8px",
-    fontSize: "14px",
-    fontWeight: "500",
-    color: "#333",
-};
-
-const requiredSpanStyle = {
-    color: "red",
-    marginLeft: "4px",
-};
-
-const selectBaseStyle = {
-    padding: "10px 12px",
-    fontSize: "14px",
-    border: "1px solid #ccc",
-    borderRadius: "8px",
-    outline: "none",
-    backgroundColor: "#f9fafb",
-};
-
-const selectInvalidStyle = {
-    borderColor: "#dc3545",
-    backgroundColor: "#fff5f5",
-};
-
-const errorTextStyle = {
-    color: "#dc3545",
-    fontSize: "12px",
-    marginTop: "4px",
-};
-
-const attachmentBoxStyle = {
-    border: "1px dashed #ccc",
-    borderRadius: "8px",
-    padding: "20px",
-    textAlign: "center",
-    backgroundColor: "#fafafa",
-    marginTop: "8px",
-};
-
-const attachmentTextStyle = {
-    margin: "8px 0",
-    color: "#666",
-};
-
-const attachmentSubtextStyle = {
-    fontSize: "12px",
-    color: "#999",
-    margin: "4px 0 16px 0",
-};
-
-const fileInputStyle = {
-    display: "none",
-};
-
-const modalContentStyle = {
-    textAlign: "center",
-};
-
-const modalTitleStyle = {
-    fontSize: "20px",
-    fontWeight: "600",
-    margin: "0 0 16px 0",
-    color: "#333",
-};
-
-const modalTextStyle = {
-    color: "#666",
-    marginBottom: "24px",
-    lineHeight: 1.5,
-};
-
-const modalActionsStyle = {
-    display: "flex",
-    gap: "12px",
-    justifyContent: "center",
-};
-
-const submitRowStyle = {
-    display: "flex",
-    justifyContent: "flex-end",
-    marginTop: "16px",
-};
-
-const initialState = {
-    inquiry: {
-        isTouched: false,
-        validationRules: {
-            required: true,
-            min: 1,
-            max: 20,
-            email: false,
-        },
-        isValid: false,
-        value: "",
-    },
-    name: {
-        isTouched: false,
-        validationRules: {
-            required: true,
-            min: 6,
-            max: 20,
-            email: false,
-        },
-        isValid: false,
-        value: "",
-    },
-    email: {
-        isTouched: false,
-        validationRules: {
-            required: true,
-            min: 5,
-            max: 50,
-            email: true,
-        },
-        isValid: false,
-        value: "",
-    },
-    message: {
-        validationRules: {
-            required: true,
-            min: 10,
-            max: 500,
-            email: false,
-        },
-        isValid: false,
-        isTouched: false,
-        value: "",
-    },
-    attachment: {
-        value: null,
-    },
-};
+import {fakeAPIRequest} from "./FakeAPIRequest.js";
+import {initialState, reducer, actions} from "./FormState.js";
+import {
+    PageWrapper,
+    Container,
+    ModalActions,
+    Form,
+    FormRow,
+    FormColumn,
+    Label,
+    AttachmentBox,
+    AttachmentSubtext,
+    AttachmentText,
+    ModalText,
+    ErrorText,
+    SpanText,
+    HeaderBox,
+    ModalContent,
+    ModalTitle,
+    SubmitRow,
+    SelectContainer,
+    StyledSelect,
+    Title,
+    FileInput
+} from "./ContactUsStyles";
 
 function ContactFormV2() {
-    const [state, setState] = useState(initialState);
+    // const [state, setState] = useState(initialState);
     const [showConfirm, setShowConfirm] = useState(false);
     const selectRef = useRef(null);
+    const [isPending, startTransition] = useTransition();
+    const [state, dispatch] = useReducer(reducer, initialState);
+
     useEffect(() => {
         selectRef.current?.focus();
-    }, [])
+    }, []);
 
     const formIsValid = useMemo(() => {
-        return ["inquiry", "name", "email", "message"].every((key) => state[key].isValid);
+        return ["inquiry", "name", "email", "message"].every(
+            (key) => state[key].isValid
+        );
     }, [state]);
 
     const handleFocus = (e) => {
         const name = e.target.name;
-        setState((prevState) => ({
-            ...prevState,
-            [name]: {
-                ...prevState[name],
-                isTouched: true,
-            },
-        }));
+        dispatch({
+            type: actions.TOUCH_FIELD,
+            payload: {
+                key: name,
+            }
+        })
+        /* setState((prevState) => ({
+             ...prevState,
+             [name]: {
+                 ...prevState[name],
+                 isTouched: true,
+             },
+         }));
+
+         */
     };
 
     const shouldShowError = (fieldName) => {
@@ -261,23 +101,33 @@ function ContactFormV2() {
 
     const handleChange = (e) => {
         const name = e.target.name;
-        const value = name === "attachment" ? e.target.files?.[0] ?? null : e.target.value;
+        const value =
+            name === "attachment" ? e.target.files?.[0] ?? null : e.target.value;
 
-        setState((prevState) => {
-            const field = prevState[name];
-            let isValid = field.isValid;
-            if (field.validationRules) {
-                isValid = validateValue(value, field.validationRules);
+        dispatch({
+            type: actions.UPDATE_FIELD,
+            payload: {
+                key: name,
+                value: value,
             }
-            return {
-                ...prevState,
-                [name]: {
-                    ...field,
-                    value: value,
-                    isValid: isValid,
-                },
-            };
-        });
+        })
+        /* setState((prevState) => {
+             const field = prevState[name];
+             let isValid = field.isValid;
+             if (field.validationRules) {
+                 isValid = validateValue(value, field.validationRules);
+             }
+             return {
+                 ...prevState,
+                 [name]: {
+                     ...field,
+                     value: value,
+                     isValid: isValid,
+                 },
+             };
+         });
+
+         */
     };
 
     const handleSubmit = (e) => {
@@ -285,42 +135,45 @@ function ContactFormV2() {
         if (!formIsValid) return;
         setShowConfirm(true);
     };
-
-    const confirmSubmit = () => {
+    const confirmSubmit = async () => {
         const form = document.querySelector("form");
         const attachment = form?.attachment.files[0] || null;
+        await fakeAPIRequest(3000);
         console.log("Form submitted values:");
         console.log(state, {attachment});
 
-        setState(initialState);
-        if (form) {
-            form.attachment.value = null;
-        }
-        setShowConfirm(false);
+        startTransition(() => {
+            // setState(initialState);
+            dispatch({
+                type: actions.RESET,
+            })
+            if (form) {
+                form.attachment.value = null;
+            }
+            setShowConfirm(false);
+        });
+        //     setState(initialState);
+        //     if (form) {
+        //         form.attachment.value = null;
+        //     }
+        //     setShowConfirm(false);
+        // };
     };
-
     return (
-        <>
-            <GlobalStyles/>
-            <main style={containerStyle}>
-                <header style={headerStyle}>
-                    <h1 style={titleStyle}>Contact Us</h1>
-                </header>
+        <PageWrapper>
+            <Container>
+                <HeaderBox>
+                    <Title>Contact Us</Title>
+                </HeaderBox>
 
-                <form
-                    style={formStyle}
-                    action="AboutMe.html"
-                    method="get"
-                    encType="multipart/form-data"
-                    onSubmit={handleSubmit}
-                >
-                    <div style={formRowStyle}>
-                        <div style={selectContainerStyle}>
-                            <label htmlFor="inquiry" style={labelStyle}>
+                <Form onSubmit={handleSubmit}>
+                    <FormRow>
+                        <SelectContainer>
+                            <Label htmlFor="inquiry">
                                 Inquiry Type
-                                <span style={requiredSpanStyle}>*</span>
-                            </label>
-                            <select
+                                <SpanText>*</SpanText>
+                            </Label>
+                            <StyledSelect
                                 id="inquiry"
                                 name="inquiry"
                                 required
@@ -328,20 +181,17 @@ function ContactFormV2() {
                                 onChange={handleChange}
                                 onFocus={handleFocus}
                                 ref={selectRef}
-                                style={{
-                                    ...selectBaseStyle,
-                                    ...(shouldShowError("inquiry") ? selectInvalidStyle : {}),
-                                }}
+                                $invalid={shouldShowError("inquiry")}
                             >
                                 <option value="">Please select</option>
                                 <option value="general">General Info</option>
                                 <option value="support">Support</option>
                                 <option value="feedback">Feedback</option>
-                            </select>
+                            </StyledSelect>
                             {shouldShowError("inquiry") && (
-                                <p style={errorTextStyle}>{getErrorMessage("inquiry")}</p>
+                                <ErrorText>{getErrorMessage("inquiry")}</ErrorText>
                             )}
-                        </div>
+                        </SelectContainer>
 
                         <Input
                             label="Name"
@@ -352,11 +202,13 @@ function ContactFormV2() {
                             onChange={handleChange}
                             onFocus={handleFocus}
                             isInvalid={shouldShowError("name")}
-                            errorMessage={shouldShowError("name") ? getErrorMessage("name") : ""}
+                            errorMessage={
+                                shouldShowError("name") ? getErrorMessage("name") : ""
+                            }
                         />
-                    </div>
+                    </FormRow>
 
-                    <div style={formRowSingleStyle}>
+                    <FormColumn>
                         <Input
                             label="Email"
                             name="email"
@@ -367,11 +219,12 @@ function ContactFormV2() {
                             onChange={handleChange}
                             onFocus={handleFocus}
                             isInvalid={shouldShowError("email")}
-                            errorMessage={shouldShowError("email") ? getErrorMessage("email") : ""}
+                            errorMessage={
+                                shouldShowError("email") ? getErrorMessage("email") : ""
+                            }
                         />
-                    </div>
-
-                    <div style={formRowSingleStyle}>
+                    </FormColumn>
+                    <FormColumn>
                         <Input
                             label="Message"
                             name="message"
@@ -382,60 +235,66 @@ function ContactFormV2() {
                             onChange={handleChange}
                             onFocus={handleFocus}
                             isInvalid={shouldShowError("message")}
-                            errorMessage={shouldShowError("message") ? getErrorMessage("message") : ""}
+                            errorMessage={
+                                shouldShowError("message") ? getErrorMessage("message") : ""
+                            }
                         />
-                    </div>
+                    </FormColumn>
 
-                    <div style={formRowSingleStyle}>
-                        <label style={labelStyle}>Attachments</label>
-                        <div style={attachmentBoxStyle}>
-                            <p style={attachmentTextStyle}>Choose file or drag here</p>
-                            <p style={attachmentSubtextStyle}>
+                    <FormColumn>
+                        <Label>Attachments</Label>
+                        <AttachmentBox>
+                            <AttachmentText>Choose file or drag here</AttachmentText>
+                            <AttachmentSubtext>
                                 Supported: JPG, JPEG, PNG, GIF, PDF
-                            </p>
+                            </AttachmentSubtext>
 
                             <label htmlFor="file-upload">
                                 <Button
                                     type="button"
-                                    onClick={() => document.getElementById("file-upload").click()}
+                                    onClick={() =>
+                                        document.getElementById("file-upload").click()
+                                    }
                                 >
                                     Browse file
                                 </Button>
                             </label>
 
-                            <input
+                            <FileInput
                                 type="file"
                                 id="file-upload"
                                 name="attachment"
                                 accept=".jpg,.jpeg,.png,.gif,.pdf"
                                 onChange={handleChange}
-                                style={fileInputStyle}
                             />
-                        </div>
-                    </div>
+                        </AttachmentBox>
+                    </FormColumn>
 
-                    <div style={submitRowStyle}>
+                    <SubmitRow>
                         <Button type="submit" disabled={!formIsValid}>
                             Submit
                         </Button>
-                    </div>
+                    </SubmitRow>
 
                     <Modal isOpen={showConfirm} onClose={() => setShowConfirm(false)}>
-                        <div style={modalContentStyle}>
-                            <h2 style={modalTitleStyle}>Confirm Submission</h2>
-                            <p style={modalTextStyle}>
+                        <ModalContent>
+                            <ModalTitle>Confirm Submission</ModalTitle>
+                            <ModalText>
                                 Are you sure that you want to submit this form?
-                            </p>
+                            </ModalText>
 
-                            <div style={modalActionsStyle}>
-                                <Button onClick={() => setShowConfirm(false)}>No</Button>
-                                <Button onClick={confirmSubmit}>Yes</Button>
-                            </div>
-                        </div>
+                            <ModalActions>
+                                {/*<Button onClick={() => setShowConfirm(false)}>No</Button>*/}
+                                {/*<Button onClick={confirmSubmit}>Yes</Button>*/}
+                                <Button onClick={() => setShowConfirm(false)} disabled={isPending}>No</Button>
+                                <Button onClick={confirmSubmit}
+                                        disabled={isPending}>{isPending ? "Submitting pls wait..." : "Yes"}</Button>
+                            </ModalActions>
+                        </ModalContent>
                     </Modal>
-                </form>
-            </main>
-        </>
+                </Form>
+            </Container>
+        </PageWrapper>
     );
 }
 
