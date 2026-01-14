@@ -1,198 +1,39 @@
-import React, {useMemo, useState, useRef, useEffect, useTransition} from "react";
-import styled from "styled-components";
-import {validateValue} from "./validationFunctions";
+import React, {useMemo, useState, useRef, useEffect, useTransition, useReducer} from "react";
 import Modal from "../components/ModalModule";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import {fakeAPIRequest} from "./FakeAPIRequest.js";
-
-const PageWrapper = styled.div`
-    min-height: 100vh;
-    background-color: #f7f7f9;
-    padding: 20px;
-    font-family: Arial;
-`;
-
-const Container = styled.main`
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 24px;
-    background-color: #fff;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-`;
-
-const HeaderBox = styled.header`
-    margin-bottom: 32px;
-    text-align: center;
-`;
-
-const Title = styled.h1`
-    font-size: 32px;
-    font-weight: 700;
-    color: #000;
-    margin: 0;
-`;
-
-const Form = styled.form`
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-`;
-
-const FormRow = styled.div`
-    display: flex;
-    gap: 16px;
-    width: 100%;
-`;
-
-const FormColumn = styled.div`
-    display: flex;
-    flex-direction: column;
-`;
-
-const SelectContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    margin-bottom: 16px;
-    width: 100%;
-`;
-
-const Label = styled.label`
-    margin-bottom: 8px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #333;
-`;
-
-const SpanText = styled.span`
-    color: red;
-    margin-left: 4px;
-`;
-
-const StyledSelect = styled.select`
-    padding: 10px 12px;
-    font-size: 14px;
-    border-radius: 8px;
-    outline: none;
-    background-color: ${(props) => (props.$invalid ? "#fff5f5" : "#f9fafb")};
-    border: 1px solid ${(props) => (props.$invalid ? "#dc3545" : "#ccc")};
-`;
-
-const ErrorText = styled.p`
-    color: #dc3545;
-    font-size: 12px;
-    margin-top: 4px;
-`;
-
-const AttachmentBox = styled.div`
-    border: 1px dashed #ccc;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    background-color: #fafafa;
-    margin-top: 8px;
-`;
-
-const AttachmentText = styled.p`
-    margin: 8px 0;
-    color: #666;
-`;
-
-const AttachmentSubtext = styled.p`
-    font-size: 12px;
-    color: #999;
-    margin: 4px 0 16px 0;
-`;
-
-const FileInput = styled.input`
-    display: none;
-`;
-
-const SubmitRow = styled.div`
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 16px;
-`;
-
-const ModalContent = styled.div`
-    text-align: center;
-`;
-
-const ModalTitle = styled.h2`
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 16px 0;
-    color: #333;
-`;
-
-const ModalText = styled.p`
-    color: #666;
-    margin-bottom: 24px;
-    line-height: 1.5;
-`;
-
-const ModalActions = styled.div`
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-`;
-
-const initialState = {
-    inquiry: {
-        isTouched: false,
-        validationRules: {
-            required: true,
-            min: 1,
-            max: 20,
-            email: false,
-        },
-        isValid: false,
-        value: "",
-    },
-    name: {
-        isTouched: false,
-        validationRules: {
-            required: true,
-            min: 6,
-            max: 20,
-            email: false,
-        },
-        isValid: false,
-        value: "",
-    },
-    email: {
-        isTouched: false,
-        validationRules: {
-            required: true,
-            min: 5,
-            max: 50,
-            email: true,
-        },
-        isValid: false,
-        value: "",
-    },
-    message: {
-        validationRules: {
-            required: true,
-            min: 10,
-            max: 500,
-            email: false,
-        },
-        isValid: false,
-        isTouched: false,
-        value: "",
-    },
-    attachment: {
-        value: null,
-    },
-};
+import {initialState, reducer, actions} from "./FormState.js";
+import {
+    PageWrapper,
+    Container,
+    ModalActions,
+    Form,
+    FormRow,
+    FormColumn,
+    Label,
+    AttachmentBox,
+    AttachmentSubtext,
+    AttachmentText,
+    ModalText,
+    ErrorText,
+    SpanText,
+    HeaderBox,
+    ModalContent,
+    ModalTitle,
+    SubmitRow,
+    SelectContainer,
+    StyledSelect,
+    Title,
+    FileInput
+} from "./ContactUsStyles";
 
 function ContactFormV2() {
-    const [state, setState] = useState(initialState);
+    // const [state, setState] = useState(initialState);
     const [showConfirm, setShowConfirm] = useState(false);
     const selectRef = useRef(null);
-    const [isPending, startTransition] = useTransition(); //todo wrap the confirm submit with this
+    const [isPending, startTransition] = useTransition();
+    const [state, dispatch] = useReducer(reducer, initialState);
 
     useEffect(() => {
         selectRef.current?.focus();
@@ -206,13 +47,21 @@ function ContactFormV2() {
 
     const handleFocus = (e) => {
         const name = e.target.name;
-        setState((prevState) => ({
-            ...prevState,
-            [name]: {
-                ...prevState[name],
-                isTouched: true,
-            },
-        }));
+        dispatch({
+            type: actions.TOUCH_FIELD,
+            payload: {
+                key: name,
+            }
+        })
+        /* setState((prevState) => ({
+             ...prevState,
+             [name]: {
+                 ...prevState[name],
+                 isTouched: true,
+             },
+         }));
+
+         */
     };
 
     const shouldShowError = (fieldName) => {
@@ -255,21 +104,30 @@ function ContactFormV2() {
         const value =
             name === "attachment" ? e.target.files?.[0] ?? null : e.target.value;
 
-        setState((prevState) => {
-            const field = prevState[name];
-            let isValid = field.isValid;
-            if (field.validationRules) {
-                isValid = validateValue(value, field.validationRules);
+        dispatch({
+            type: actions.UPDATE_FIELD,
+            payload: {
+                key: name,
+                value: value,
             }
-            return {
-                ...prevState,
-                [name]: {
-                    ...field,
-                    value: value,
-                    isValid: isValid,
-                },
-            };
-        });
+        })
+        /* setState((prevState) => {
+             const field = prevState[name];
+             let isValid = field.isValid;
+             if (field.validationRules) {
+                 isValid = validateValue(value, field.validationRules);
+             }
+             return {
+                 ...prevState,
+                 [name]: {
+                     ...field,
+                     value: value,
+                     isValid: isValid,
+                 },
+             };
+         });
+
+         */
     };
 
     const handleSubmit = (e) => {
@@ -285,7 +143,10 @@ function ContactFormV2() {
         console.log(state, {attachment});
 
         startTransition(() => {
-            setState(initialState);
+            // setState(initialState);
+            dispatch({
+                type: actions.RESET,
+            })
             if (form) {
                 form.attachment.value = null;
             }

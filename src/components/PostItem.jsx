@@ -42,5 +42,10 @@ PostItem.propTypes = {
         title: PropTypes.string.isRequired,
         body: PropTypes.string.isRequired,
     }).isRequired,
+    showPost: PropTypes.bool.isRequired
 }
+
+//basically says that postitem must receive a prop called post
+//post must be an object with this specific structure where id is number, userId is number, title is string, etc etc and
+// that all of this is required and the post object itself is also required
 export default PostItem;

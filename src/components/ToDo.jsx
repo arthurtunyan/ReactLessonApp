@@ -1,10 +1,11 @@
 import styled from "styled-components";
+import {useEffect, useState} from "react";
 
 const Page = styled.div`
-  margin: 0;
-  font-family: "Times New Roman", Times, serif;
-  background-color: #fff8e8;
-  padding-top: 60px;
+    margin: 0;
+    font-family: "Times New Roman", Times, serif;
+    background-color: #fff8e8;
+    padding-top: 60px;
 `;
 
 const rows = [
@@ -35,7 +36,18 @@ const rows = [
     },
 ];
 
+
 function ToDo() {
+    const [todos, setToDos] = useState([]);
+
+    useEffect(() => {
+        fetch("https://jsonplaceholder.typicode.com/todos")
+            .then(res => res.json())
+            .then(data => {
+                setToDos(data)
+            });
+    }, []);
+    console.log(todos);
     return (
         <Page>
             <div className="info">
