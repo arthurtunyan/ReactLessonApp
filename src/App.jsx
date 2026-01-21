@@ -2,9 +2,9 @@ import {BrowserRouter, Route, Routes} from "react-router";
 import Header from "./components/Header";
 import {lazy, Suspense} from "react";
 
-const ToDo = lazy(() => import("./components/ToDo"))
-const Gallery = lazy(() => import("./components/Gallery"))
-const AboutMe = lazy(() => import("./components/AboutMe"))
+const ToDo = lazy(() => import("./routes/ToDo.jsx"))
+const Gallery = lazy(() => import("./routes/Gallery.jsx"))
+const AboutMe = lazy(() => import("./routes/AboutMe.jsx"))
 const ContactUs = lazy(() => import("./routes/ContactUs"))
 const Home = lazy(() => import("./routes/Home"))
 

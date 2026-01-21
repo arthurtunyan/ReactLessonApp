@@ -29,11 +29,11 @@ const inputBaseStyle = {
 };
 
 const inputFocusStyle = {
-    borderColor: "#007bff",
+    border: "1px solid #007bff",
 };
 
 const inputInvalidStyle = {
-    borderColor: "#dc3545",
+    border: "1px solid #dc3545",
     backgroundColor: "#fff5f5",
 };
 
