@@ -1,0 +1,1 @@
+{"version":3,"file":"FakeAPIRequest.js","sourceRoot":"","sources":["../../../src/contact-us/FakeAPIRequest.js"],"names":[],"mappings":"AAAA;;;;GAIG;AACH,MAAM,CAAC,MAAM,cAAc,GAAG,CAAC,EAAE,EAAE,EAAE;IACjC,OAAO,IAAI,OAAO,CAAC,CAAC,OAAO,EAAC,EAAE;QAC1B,UAAU,CAAC,GAAG,EAAE;YACZ,OAAO,EAAE,CAAA;QACb,CAAC,EAAE,EAAE,CAAC,CAAA;IACV,CAAC,CAAC,CAAA;AACN,CAAC,CAAA"}
